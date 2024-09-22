@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 import pandas as pd
-import joblib
+from sklearn.externals import joblib
 
 app = FastAPI()
 
