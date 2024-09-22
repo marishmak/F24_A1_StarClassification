@@ -1,20 +1,17 @@
-# Dockerfile
 # Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3.9
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /deployment/app
 
 # Copy the current directory contents into the container at /app
-COPY . /app
+COPY . /deployment/app
 
 # Install Python dependencies
-RUN pip install --no-cache-dir streamlit tensorflow numpy joblib pandas
+RUN pip install streamlit requests
 
 # Expose the port Streamlit runs on
 EXPOSE 8501
 
 # Command to run the Streamlit app
-CMD ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
-
-
+CMD ["streamlit", "run", "deployment/app/streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]

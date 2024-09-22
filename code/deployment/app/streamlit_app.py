@@ -1,17 +1,17 @@
 # app.py
 import streamlit as st
 import numpy as np
-import tensorflow as tf
 import pandas as pd
-from sklearn.externals import joblib
 import requests
+import pickle
 
 
 # FastAPI endpoint
 FASTAPI_URL = "http://fastapi:8000/predict"
 
-# Load the pre-trained TensorFlow model
-model = tf.keras.models.load_model("model/mymodel.h5")
+# loading models
+model = pickle.load(open('models\mymodel.pkl', 'rb'))
+scaler = pickle.load(open('models\scaler.pkl', 'rb'))  
 
 # Title and instructions for the app
 st.title("Star Classification Prediction App")
@@ -47,24 +47,15 @@ if st.button("Classify the Star"):
                             Star_color_whitish, Star_color_yellow_white, Star_color_yellowish,
                             Star_color_yellowish_white]])
     
-    scaler = joblib.load('F24_A1_StarClassification\models\scaler.save') 
     
     # Scale the input data using the same scaler used during training
     input_scaled = scaler.transform(input_data[input_data.columns[:5]])
 
-    input_data.loc[0:5] = input_scaled
+    input_data.iloc[0, :5] = input_scaled.flatten()
 
     # Send a request to the FastAPI prediction endpoint
     response = requests.post(FASTAPI_URL, json=input_data)
     prediction = response.json()["prediction"]
-    # Display the result
-    st.success(f"The model predicts class: {prediction}")
-
-    # # Make the prediction using the model
-    # prediction = model.predict(input_data)
-
-    # # Get the predicted class (highest probability)
-    # predicted_class = np.argmax(prediction, axis=1)
 
     st.success(f"The star is classified as: {prediction}")
 

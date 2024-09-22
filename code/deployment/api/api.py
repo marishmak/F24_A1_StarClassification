@@ -1,17 +1,15 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import numpy as np
-import tensorflow as tf
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
-from sklearn.externals import joblib
+import pickle
 
 app = FastAPI()
 
-model = tf.keras.models.load_model('F24_A1_StarClassification\models\mymodel.keras')
-scaler = joblib.load('F24_A1_StarClassification\models\scaler.save') 
-
-# scaler = StandardScaler()
+# loading models
+model = pickle.load(open('models\mymodel.pkl', 'rb'))
+scaler = pickle.load(open('models\scaler.pkl', 'rb'))  
 
 class StarData(BaseModel):
     temperature: float
@@ -32,15 +30,6 @@ class StarData(BaseModel):
     Star_color_yellowish: int
     Star_color_yellowish_white: int
 
-
-# @app.on_event("startup")
-# async def load_encoders():
-#     """ This function loads encoders or preprocessors during app startup if needed. """
-#     global scaler
-    
-    
-
-
 # Create a prediction endpoint
 @app.post("/predict/")
 async def predict(data: StarData):
@@ -55,13 +44,9 @@ async def predict(data: StarData):
     # Scale the input data using the same scaler used during training
     input_scaled = scaler.transform(input_data[input_data.columns[:5]])
 
-    input_data.loc[0:5] = input_scaled
+    input_data.iloc[0, :5] = input_scaled.flatten()
+
     
     # Perform the prediction
     prediction = model.predict(input_data)
-    return {"prediction": int(prediction[0])}
-
-
-# @app.get("/")
-# async def root():
-#     return {"message": "Welcome to the Star Spectral Class Prediction API!"}
+    return {"prediction": prediction}
