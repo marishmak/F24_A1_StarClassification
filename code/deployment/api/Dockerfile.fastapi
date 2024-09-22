@@ -1,0 +1,16 @@
+# Dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.9
+# Set the working directory
+WORKDIR /api
+# Copy the current directory contents into the container at
+/api
+COPY . /api
+# Install the necessary packages
+RUN pip install fastapi uvicorn scikit-learn joblib
+
+# Expose the port that FastAPI will run on
+EXPOSE 80
+
+# Command to run the API using uvicorn
+CMD ["uvicorn", "api:api", "--host", "0.0.0.0", "--port", "80"]

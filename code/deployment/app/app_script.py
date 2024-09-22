@@ -2,45 +2,71 @@
 import streamlit as st
 import numpy as np
 import tensorflow as tf
+import pandas as pd
+import joblib
+import requests
+
+
+# FastAPI endpoint
+FASTAPI_URL = "http://fastapi:8000/predict"
 
 # Load the pre-trained TensorFlow model
-model = tf.keras.models.load_model("model/star_classification_model.h5")
+model = tf.keras.models.load_model("model/mymodel.h5")
 
 # Title and instructions for the app
 st.title("Star Classification Prediction App")
 st.write("""
-This app predicts the star class based on input features such as 
-**Temperature**, **Luminosity**, **Radius**, and **Absolute Magnitude**.
-""")
+This app predicts the star class based on input features.""")
 
 # Input fields for the star parameters
-temperature = st.number_input("Temperature (K)", min_value=0.0, value=5000.0)
-luminosity = st.number_input("Luminosity (L/Lo)", min_value=0.0, value=1.0)
-radius = st.number_input("Radius (R/Ro)", min_value=0.0, value=1.0)
-absolute_magnitude = st.number_input("Absolute Magnitude (Mv)", value=4.83)
+temperature = st.number_input("Temperature (K)")
+luminosity = st.number_input("Luminosity (L/Lo)")
+radius = st.number_input("Radius (R/Ro)")
+absolute_magnitude = st.number_input("Absolute Magnitude (Mv)")
+star_type = st.number_input("Star type")
+Star_color_blue = st.number_input("Is star blue")
+Star_color_blue_white = st.number_input("Is star blue-white")
+Star_color_orange = st.number_input("Is star orange")
+Star_color_orange_red = st.number_input("Is star orange-red")
+Star_color_pale_yellow_orange = st.number_input("Is star pale yellow-orange")
+Star_color_red = st.number_input("Is star red")
+Star_color_white = st.number_input("Is star white")
+Star_color_white_yellow = st.number_input("Is star white-yellow")
+Star_color_whitish = st.number_input("Is star whitish")
+Star_color_yellow_white = st.number_input("Is star yellow-white")
+Star_color_yellowish = st.number_input("Is star yellowish")
+Star_color_yellowish_white = st.number_input("Is star yellowish-white")
 
 # Button to trigger prediction
-if st.button("Classify Star"):
+if st.button("Classify the Star"):
     # Prepare input data for prediction
-    input_data = np.array([[temperature, luminosity, radius, absolute_magnitude]])
+    input_data = np.array([[temperature, luminosity, radius, absolute_magnitude, star_type,
+                            Star_color_blue, Star_color_blue_white, Star_color_orange,
+                            Star_color_orange_red, Star_color_pale_yellow_orange,
+                            Star_color_red, Star_color_white, Star_color_white_yellow,
+                            Star_color_whitish, Star_color_yellow_white, Star_color_yellowish,
+                            Star_color_yellowish_white]])
+    
+    scaler = joblib.load('F24_A1_StarClassification\models\scaler.save') 
+    
+    # Scale the input data using the same scaler used during training
+    input_scaled = scaler.transform(input_data[input_data.columns[:5]])
 
-    # Make the prediction using the model
-    prediction = model.predict(input_data)
+    input_data.loc[0:5] = input_scaled
 
-    # Get the predicted class (highest probability)
-    predicted_class = np.argmax(prediction, axis=1)
+    # Send a request to the FastAPI prediction endpoint
+    response = requests.post(FASTAPI_URL, json=input_data)
+    prediction = response.json()["prediction"]
+    # Display the result
+    st.success(f"The model predicts class: {prediction}")
 
-    # Map the predicted class to the star category
-    star_classes = {
-        0: "Red Dwarf",
-        1: "Brown Dwarf",
-        2: "White Dwarf",
-        3: "Main Sequence",
-        4: "Supergiant",
-        5: "Hypergiant"
-    }
+    # # Make the prediction using the model
+    # prediction = model.predict(input_data)
 
-    st.success(f"The star is classified as: {star_classes.get(predicted_class[0], 'Unknown')}")
+    # # Get the predicted class (highest probability)
+    # predicted_class = np.argmax(prediction, axis=1)
+
+    st.success(f"The star is classified as: {prediction}")
 
 # Footer information
-st.write("Developed by [Your Name]")
+st.write("Developed by Mariia Shmakova")

@@ -4,10 +4,12 @@ import pandas as pd
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.externals.joblib import dump, load
 from sklearn.metrics import accuracy_score
 
 import tensorflow as tf
 import keras
+import joblib
 from keras import Model, layers, optimizers
 from keras import utils
 from utils import to_categorical
@@ -39,6 +41,9 @@ X_test_scaled = scaler.transform(X_test)
 label_encoder = LabelEncoder()
 y_train_encoded = label_encoder.fit_transform(y_train)
 y_test_encoded = label_encoder.transform(y_test)
+
+joblib.dump(scaler, 'F24_A1_StarClassification\models\scaler.save') 
+
 
 input_shape = X_train_scaled.shape[1]
 num_classes = len(np.unique(y_train))
