@@ -4,14 +4,15 @@ import numpy as np
 import pandas as pd
 import requests
 import pickle
+import os
 
 
 # FastAPI endpoint
-FASTAPI_URL = "http://fastapi:8000/predict"
+FASTAPI_URL = "http://fastapi:8000"
 
 # loading models
-model = pickle.load(open('models\mymodel.pkl', 'rb'))
-scaler = pickle.load(open('models\scaler.pkl', 'rb'))  
+model = pickle.load(open(os.path.join('models', 'mymodel.pkl'), 'rb'))
+scaler = pickle.load(open(os.path.join('models', 'scaler.pkl'), 'rb'))
 
 # Title and instructions for the app
 st.title("Star Classification Prediction App")
@@ -47,11 +48,17 @@ if st.button("Classify the Star"):
                             Star_color_whitish, Star_color_yellow_white, Star_color_yellowish,
                             Star_color_yellowish_white]])
     
+    input_data = pd.DataFrame(input_data)
     
     # Scale the input data using the same scaler used during training
-    input_scaled = scaler.transform(input_data[input_data.columns[:5]])
+    input_data = scaler.transform(input_data)
+    # input_scaled = scaler.transform(input_data[input_data.columns[:5]])
 
-    input_data.iloc[0, :5] = input_scaled.flatten()
+    # input_data.iloc[0, :5] = input_scaled.flatten()
+
+    # for i, col in enumerate(input_data.columns):
+    #     if i>3:
+    #         input_data[col] = input_data[col].astype(int)
 
     # Send a request to the FastAPI prediction endpoint
     response = requests.post(FASTAPI_URL, json=input_data)

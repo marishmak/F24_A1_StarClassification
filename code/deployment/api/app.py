@@ -1,15 +1,20 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import numpy as np
-from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import pickle
+import os
 
 app = FastAPI()
 
 # loading models
-model = pickle.load(open('models\mymodel.pkl', 'rb'))
-scaler = pickle.load(open('models\scaler.pkl', 'rb'))  
+model = pickle.load(open(os.path.join('models', 'mymodel.pkl'), 'rb'))
+scaler = pickle.load(open(os.path.join('models', 'scaler.pkl'), 'rb'))
+
+# @app.get("/")
+# def read_root():
+#     return {"Hello": "World"}
+
+
 
 class StarData(BaseModel):
     temperature: float
@@ -31,7 +36,7 @@ class StarData(BaseModel):
     Star_color_yellowish_white: int
 
 # Create a prediction endpoint
-@app.post("/predict/")
+@app.post("/")
 async def predict(data: StarData):
     # Convert the input data into a DataFrame
     input_data = {'Temperature (K)': [data.temperature],'Luminosity(L/Lo)':data.luminosity,'Radius(R/Ro)':data.radius,'Absolute magnitude(Mv)':data.absolute_magnitude,'Star type':data.star_type,
@@ -42,9 +47,14 @@ async def predict(data: StarData):
     input_data = pd.DataFrame(input_data)
     
     # Scale the input data using the same scaler used during training
-    input_scaled = scaler.transform(input_data[input_data.columns[:5]])
+    input_data = scaler.transform(input_data)
+    # input_scaled = scaler.transform(input_data[input_data.columns[:5]])
 
-    input_data.iloc[0, :5] = input_scaled.flatten()
+    # input_data.iloc[0, :5] = input_scaled.flatten()
+
+    # for i, col in enumerate(input_data.columns):
+    #     if i>3:
+    #         input_data[col] = input_data[col].astype(int)
 
     
     # Perform the prediction

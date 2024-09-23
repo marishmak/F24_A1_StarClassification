@@ -11,13 +11,11 @@ import pickle
 import os
 
 notebook_path = os.path.abspath("f24-spectral-class-prediction.ipynb")
-datafile = os.path.join(os.path.dirname(notebook_path), 'code\datasets\stardata.csv')
+datafile = os.path.join(os.path.dirname(notebook_path), 'code', 'datasets', 'stardata.csv')
 
 df = pd.read_csv(datafile)
 df['Star color'] = df['Star color'].str.lower().str.strip().str.replace('-', ' ')
 
-
-target_variable = 'Spectral Class'
 df_encoded = pd.get_dummies(df, columns=['Star color'], dtype=int)
 
 # Separate the features and the target variable for model training
@@ -33,8 +31,8 @@ X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
 # Save the standardizer
-pickle.dump(scaler, open('models\scaler.pkl','wb')) 
-
+pickle.dump(scaler, open(os.path.join('models', 'scaler.pkl'), 'wb')) 
+pickle.dump(scaler, open(os.path.join('code', 'models', 'scaler.pkl'), 'wb')) 
 
 model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, random_state=42)
 
@@ -45,5 +43,9 @@ accuracy = accuracy_score(y_test, y_pred)
 
 print(f"Accuracy: {accuracy}")
 
-with open('models\mymodel.pkl', 'wb') as f:
+# Save models
+with open(os.path.join('models', 'mymodel.pkl'), 'wb') as f:
+    pickle.dump(model, f)
+
+with open(os.path.join('code', 'models', 'mymodel.pkl'), 'wb') as f:
     pickle.dump(model, f)
