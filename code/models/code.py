@@ -18,7 +18,7 @@ df['Star color'] = df['Star color'].str.lower().str.strip().str.replace('-', ' '
 
 df_encoded = pd.get_dummies(df, columns=['Star color'], dtype=int)
 
-with open(os.path.join('code', 'models', 'content', 'columns.txt'), 'w') as f:
+with open(os.path.join('data', 'columns.txt'), 'w') as f:
     f.write(str(df_encoded.columns))
 
 # Separate the features and the target variable for model training
