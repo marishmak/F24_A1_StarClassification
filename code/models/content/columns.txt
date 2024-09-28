@@ -1,0 +1,8 @@
+Index(['Temperature (K)', 'Luminosity(L/Lo)', 'Radius(R/Ro)',
+       'Absolute magnitude(Mv)', 'Star type', 'Spectral Class',
+       'Star color_blue', 'Star color_blue white', 'Star color_orange',
+       'Star color_orange red', 'Star color_pale yellow orange',
+       'Star color_red', 'Star color_white', 'Star color_white yellow',
+       'Star color_whitish', 'Star color_yellow white', 'Star color_yellowish',
+       'Star color_yellowish white'],
+      dtype='object')

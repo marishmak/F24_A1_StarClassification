@@ -3,60 +3,71 @@ from pydantic import BaseModel
 import pandas as pd
 import pickle
 import os
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
 # loading models
-model = pickle.load(open(os.path.join('models', 'mymodel.pkl'), 'rb'))
-scaler = pickle.load(open(os.path.join('models', 'scaler.pkl'), 'rb'))
+model = pickle.load(open(os.path.join('models', 'content', 'mymodel.pkl'), 'rb'))
+scaler = pickle.load(open(os.path.join('models', 'content', 'scaler.pkl'), 'rb'))
 
-# @app.get("/")
-# def read_root():
-#     return {"Hello": "World"}
+@app.get("/")
+def read_root():
+    return {"message": "Welcome from the API"}
 
-
-
+# Input data schema using Pydantic
 class StarData(BaseModel):
     temperature: float
     luminosity: float
     radius: float
     absolute_magnitude: float
-    star_type: int
-    Star_color_blue: int
-    Star_color_blue_white: int
-    Star_color_orange: int
-    Star_color_orange_red: int
-    Star_color_pale_yellow_orange: int
-    Star_color_red: int
-    Star_color_white: int
-    Star_color_white_yellow: int
-    Star_color_whitish: int
-    Star_color_yellow_white: int
-    Star_color_yellowish: int
-    Star_color_yellowish_white: int
+    star_type: float
+    Star_color_blue: float
+    Star_color_blue_white: float
+    Star_color_orange: float
+    Star_color_orange_red: float
+    Star_color_pale_yellow_orange: float
+    Star_color_red: float
+    Star_color_white: float
+    Star_color_white_yellow: float
+    Star_color_whitish: float
+    Star_color_yellow_white: float
+    Star_color_yellowish: float
+    Star_color_yellowish_white: float
 
 # Create a prediction endpoint
-@app.post("/")
+@app.post("/predict")
 async def predict(data: StarData):
-    # Convert the input data into a DataFrame
-    input_data = {'Temperature (K)': [data.temperature],'Luminosity(L/Lo)':data.luminosity,'Radius(R/Ro)':data.radius,'Absolute magnitude(Mv)':data.absolute_magnitude,'Star type':data.star_type,
-              'Star_color_blue':[data.Star_color_blue], 'Star_color_blue_white':data.Star_color_blue_white, 'Star_color_orange':data.Star_color_orange, 'Star_color_orange_red':data.Star_color_orange_red, 'Star_color_pale_yellow_orange':data.Star_color_pale_yellow_orange,
-              'Star_color_red':[data.Star_color_red], 'Star_color_white':data.Star_color_white, 'Star_color_white_yellow':data.Star_color_white_yellow, 'Star_color_whitish':data.Star_color_whitish, 'Star_color_yellow_white':data.Star_color_yellow_white, 
-              'Star_color_yellowish':[data.Star_color_yellowish], 'Star_color_yellowish_white':data.Star_color_yellowish_white }
-    
-    input_data = pd.DataFrame(input_data)
-    
-    # Scale the input data using the same scaler used during training
-    input_data = scaler.transform(input_data)
-    # input_scaled = scaler.transform(input_data[input_data.columns[:5]])
+    try:
+        # Correct feature names to match those used during model training
+        input_data = pd.DataFrame([{
+            'Temperature (K)': data.temperature,
+            'Luminosity(L/Lo)': data.luminosity,
+            'Radius(R/Ro)': data.radius,
+            'Absolute magnitude(Mv)': data.absolute_magnitude,
+            'Star type': data.star_type,
+            'Star color_blue': data.Star_color_blue,
+            'Star color_blue white': data.Star_color_blue_white,
+            'Star color_orange': data.Star_color_orange,
+            'Star color_orange red': data.Star_color_orange_red,
+            'Star color_pale yellow orange': data.Star_color_pale_yellow_orange,
+            'Star color_red': data.Star_color_red,
+            'Star color_white': data.Star_color_white,
+            'Star color_white yellow': data.Star_color_white_yellow,
+            'Star color_whitish': data.Star_color_whitish,
+            'Star color_yellow white': data.Star_color_yellow_white,
+            'Star color_yellowish': data.Star_color_yellowish,
+            'Star color_yellowish white': data.Star_color_yellowish_white
+        }])
 
-    # input_data.iloc[0, :5] = input_scaled.flatten()
+        # Scale the input data using the same scaler used during training
+        scaled_data = scaler.transform(input_data)
 
-    # for i, col in enumerate(input_data.columns):
-    #     if i>3:
-    #         input_data[col] = input_data[col].astype(int)
+        # Perform the prediction
+        prediction = model.predict(scaled_data)
 
-    
-    # Perform the prediction
-    prediction = model.predict(input_data)
-    return {"prediction": prediction}
+        # Ensure that the prediction is returned as is, without forcing integer conversion
+        return {"prediction": str(prediction[0])}
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})

@@ -18,6 +18,9 @@ df['Star color'] = df['Star color'].str.lower().str.strip().str.replace('-', ' '
 
 df_encoded = pd.get_dummies(df, columns=['Star color'], dtype=int)
 
+with open(os.path.join('code', 'models', 'content', 'columns.txt'), 'w') as f:
+    f.write(str(df_encoded.columns))
+
 # Separate the features and the target variable for model training
 X = df_encoded.drop(['Spectral Class'], axis=1)
 y = df_encoded['Spectral Class']
@@ -32,7 +35,7 @@ X_test_scaled = scaler.transform(X_test)
 
 # Save the standardizer
 pickle.dump(scaler, open(os.path.join('models', 'scaler.pkl'), 'wb')) 
-pickle.dump(scaler, open(os.path.join('code', 'models', 'scaler.pkl'), 'wb')) 
+pickle.dump(scaler, open(os.path.join('code', 'models', 'content', 'scaler.pkl'), 'wb')) 
 
 model = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, random_state=42)
 
@@ -47,5 +50,5 @@ print(f"Accuracy: {accuracy}")
 with open(os.path.join('models', 'mymodel.pkl'), 'wb') as f:
     pickle.dump(model, f)
 
-with open(os.path.join('code', 'models', 'mymodel.pkl'), 'wb') as f:
+with open(os.path.join('code', 'models', 'content', 'mymodel.pkl'), 'wb') as f:
     pickle.dump(model, f)

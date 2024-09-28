@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9-slim 
+FROM python:3.9
 
 # Set the working directory inside the container
 WORKDIR /deployment/app
@@ -9,7 +9,7 @@ COPY . /deployment/app
 COPY . /deployment/models
 
 # Install Python dependencies
-RUN pip install --no-cache-dir streamlit requests scikit-learn pandas
+RUN pip install --no-cache-dir streamlit requests
 
 # Expose the port Streamlit runs on
 EXPOSE 8501

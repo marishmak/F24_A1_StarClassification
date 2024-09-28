@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3.9
 
 # Set the working directory
 WORKDIR /deployment/api
@@ -11,7 +11,6 @@ COPY . /deployment/models
 # Install the necessary packages
 RUN pip --no-cache-dir install fastapi uvicorn scikit-learn pandas
 
-COPY . .
 # Expose the port that FastAPI will run on
 EXPOSE 8000
 
